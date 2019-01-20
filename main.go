@@ -2,7 +2,9 @@ package main
 
 import (
 	"encoding/csv"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 	"strings"
@@ -14,25 +16,45 @@ const SKIP_LINES = 6
 const SHEET_NAME = "Movimientos"
 const DEFAULT_OUTPUT_FILENAME = "output.csv"
 
+type categoryMap struct {
+	Categories map[string]string `json:"categories"`
+	Names      map[string]string `json:"names"`
+}
+
 func main() {
 	inputName, outputName := handleArgs()
 
 	rows := readInputFile(inputName)
 	records := make([][]string, 0)
 	records = append(records, []string{"Date", "Category", "Note", "Amount"})
+	configDecoder := loadDecoder()
 
 	for i := SKIP_LINES; i < len(rows); i++ {
 		row := rows[i]
 
 		records = append(records, []string{
 			parseDate(row[0]),
-			row[2],
+			parseCategory(row[2], row[3], configDecoder),
 			parseNote(row[3]),
 			row[6],
 		})
 	}
 
 	writeCSV(records, outputName)
+}
+
+func loadDecoder() categoryMap {
+	jsonFile, err := os.Open("categories.json")
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer jsonFile.Close()
+
+	byteValue, _ := ioutil.ReadAll(jsonFile)
+	var configDecoder categoryMap
+	json.Unmarshal([]byte(byteValue), &configDecoder)
+
+	return configDecoder
 }
 
 func parseNote(note string) string {
@@ -43,6 +65,19 @@ func parseDate(date string) string {
 	dateSplit := strings.Split(date, "/")
 
 	return fmt.Sprintf("%s/%s/%s", dateSplit[1], dateSplit[0], dateSplit[2])
+}
+
+func parseCategory(category, name string, configDecoder categoryMap) string {
+	for k, v := range configDecoder.Names {
+		if strings.Contains(name, k) {
+			return v
+		}
+	}
+	newCat, ok := configDecoder.Categories[category]
+	if ok {
+		return newCat
+	}
+	return category
 }
 
 func writeCSV(records [][]string, filename string) {
