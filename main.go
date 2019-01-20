@@ -15,6 +15,7 @@ import (
 const SKIP_LINES = 6
 const SHEET_NAME = "Movimientos"
 const DEFAULT_OUTPUT_FILENAME = "output.csv"
+const ARCHIVE_PATH = "./archive"
 
 type categoryMap struct {
 	Categories map[string]string `json:"categories"`
@@ -22,24 +23,24 @@ type categoryMap struct {
 }
 
 func main() {
-	inputName, outputName := handleArgs()
+	input, outputName := handleArgs()
 
-	rows := readInputFile(inputName)
-	records := make([][]string, 0)
-	records = append(records, []string{"Date", "Category", "Note", "Amount"})
 	configDecoder := loadDecoder()
+	records := append(make([][]string, 0), []string{"Date", "Category", "Note", "Amount"})
 
-	for i := SKIP_LINES; i < len(rows); i++ {
-		row := rows[i]
-
-		records = append(records, []string{
-			parseDate(row[0]),
-			parseCategory(row[2], row[3], configDecoder),
-			parseNote(row[3]),
-			row[6],
-		})
+	fileInfo, err := ioutil.ReadDir(input)
+	if err != nil {
+		log.Fatalln("error opening file:", err)
 	}
 
+	for _, file := range fileInfo {
+		filePath := fmt.Sprintf("%s/%s", input, file.Name())
+		records = parseFile(filePath, records, configDecoder)
+
+		archiveFile(filePath, file.Name())
+	}
+
+	fmt.Printf("Found %d operations, writing to %s \n", len(records), outputName)
 	writeCSV(records, outputName)
 }
 
@@ -55,6 +56,22 @@ func loadDecoder() categoryMap {
 	json.Unmarshal([]byte(byteValue), &configDecoder)
 
 	return configDecoder
+}
+
+func parseFile(inputName string, records [][]string, configDecoder categoryMap) [][]string {
+	rows := readInputFile(inputName)
+
+	for i := SKIP_LINES; i < len(rows); i++ {
+		row := rows[i]
+
+		records = append(records, []string{
+			parseDate(row[0]),
+			parseCategory(row[2], row[3], configDecoder),
+			parseNote(row[3]),
+			row[6],
+		})
+	}
+	return records
 }
 
 func parseNote(note string) string {
@@ -73,10 +90,12 @@ func parseCategory(category, name string, configDecoder categoryMap) string {
 			return v
 		}
 	}
+
 	newCat, ok := configDecoder.Categories[category]
 	if ok {
 		return newCat
 	}
+
 	return category
 }
 
@@ -98,7 +117,7 @@ func writeCSV(records [][]string, filename string) {
 func handleArgs() (string, string) {
 	args := os.Args
 	if len(args) < 2 {
-		log.Fatalln("You must specify the name of the file")
+		log.Fatalln("Usage: csvparser path/to/input [path/to/output]")
 		return "", ""
 	}
 
@@ -118,4 +137,12 @@ func readInputFile(filename string) [][]string {
 	}
 
 	return xlsx.GetRows(SHEET_NAME)
+}
+
+func archiveFile(filePath, filename string) {
+	archiveFile := fmt.Sprintf("%s/%s", ARCHIVE_PATH, filename)
+	err := os.Rename(filePath, archiveFile)
+	if err != nil {
+		fmt.Println(err)
+	}
 }

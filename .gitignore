@@ -1,4 +1,4 @@
 *.csv
-*.xlsx
-*.xls
+archive
+input
 csvparser
