@@ -75,6 +75,9 @@ func parseFile(inputName string, records [][]string, configDecoder categoryMap) 
 }
 
 func parseNote(note string) string {
+	if strings.Contains(note, "Traspaso") || strings.Contains(note, "Transferencia") {
+		return note
+	}
 	return strings.TrimSpace(strings.Split(note, "(")[0])
 }
 
