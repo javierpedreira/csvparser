@@ -3,8 +3,8 @@ build:
 
 run:
 	cd input && /Applications/LibreOffice.app/Contents/MacOS/soffice --convert-to xlsx *.xls --headless
-	./csvparser input
 	rm input/*.xls
+	./csvparser input
 
 restore:
 	mv archive/* input
