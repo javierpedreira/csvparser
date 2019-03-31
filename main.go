@@ -72,7 +72,7 @@ func parseFile(inputName string, records [][]string, configDecoder categoryMap) 
 			parseDate(row[0]),
 			parseCategory(row[2], row[3], configDecoder),
 			parseNote(row[3]),
-			row[6],
+			row[8],
 		})
 	}
 	return records
