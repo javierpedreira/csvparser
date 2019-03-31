@@ -7,7 +7,9 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/360EntSecGroup-Skylar/excelize"
 )
@@ -16,6 +18,9 @@ const SKIP_LINES = 6
 const SHEET_NAME = "Movimientos"
 const DEFAULT_OUTPUT_FILENAME = "output.csv"
 const ARCHIVE_PATH = "./archive"
+
+// Golang Format layout
+const DATEFORMAT = "01/02/2006"
 
 type categoryMap struct {
 	Categories map[string]string `json:"categories"`
@@ -63,7 +68,6 @@ func parseFile(inputName string, records [][]string, configDecoder categoryMap) 
 
 	for i := SKIP_LINES; i < len(rows); i++ {
 		row := rows[i]
-
 		records = append(records, []string{
 			parseDate(row[0]),
 			parseCategory(row[2], row[3], configDecoder),
@@ -82,9 +86,12 @@ func parseNote(note string) string {
 }
 
 func parseDate(date string) string {
-	dateSplit := strings.Split(date, "/")
+	// Excel Date starts in 1/1/1900 + 2 days
+	start := time.Date(1900, 1, 1, 0, 0, 0, 0, time.UTC)
+	days, _ := strconv.ParseInt(date, 0, 64)
+	d := start.AddDate(0, 0, int(days)-2)
 
-	return fmt.Sprintf("%s/%s/%s", dateSplit[1], dateSplit[0], dateSplit[2])
+	return d.Format(DATEFORMAT)
 }
 
 func parseCategory(category, name string, configDecoder categoryMap) string {

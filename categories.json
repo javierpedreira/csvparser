@@ -25,7 +25,6 @@
     "Teléfono, TV e internet": "Suscripciones",
     "Decoración y mobiliario": "Hogar",
     "Hotel y alojamiento": "Viajes",
-    "Traspaso entre cuentas": "Sueldo",
     "Transacción entre cuentas de ahorro": "Ahorros",
     "": "POR-REASIGNAR"
   },
@@ -48,6 +47,12 @@
     "GLOVO": "Restaurantes",
     "Revolut": "Tarjetas Precarga",
     "PECUNIA": "Tarjetas Precarga",
-    "QUIPU": "Suscripciones"
+    "QUIPU": "Suscripciones",
+    "MAITE JORDAN": "Salud",
+    "PAGATELIA": "Coche",
+    "M.R.M 93": "Deporte",
+    "Alquiler": "Alquiler",
+    "Piso": "Alquiler",
+    "Cuenta Nómina": "Sueldo"
   }
 }
