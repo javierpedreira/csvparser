@@ -63,17 +63,31 @@ func loadDecoder() categoryMap {
 	return configDecoder
 }
 
+func loadBankRowConfig(bankName string) rowConfig {
+	jsonFile := loadJson(fmt.Sprintf("./config/%sRowConfig.json", bankName))
+
+	byteValue, _ := ioutil.ReadAll(jsonFile)
+	var bankRowConfig rowConfig
+	json.Unmarshal([]byte(byteValue), &bankRowConfig)
+
+	return bankRowConfig
+}
+
+func parseRow(row []string, configDecoder categoryMap) []string {
+	return []string{
+		parseDate(row[0]),
+		parseCategory(row[2], row[3], configDecoder),
+		parseNote(row[3]),
+		row[8],
+	}
+}
+
 func parseFile(inputName string, records [][]string, configDecoder categoryMap) [][]string {
 	rows := readInputFile(inputName)
 
 	for i := SKIP_LINES; i < len(rows); i++ {
 		row := rows[i]
-		records = append(records, []string{
-			parseDate(row[0]),
-			parseCategory(row[2], row[3], configDecoder),
-			parseNote(row[3]),
-			row[8],
-		})
+		records = append(records, parseRow(row, configDecoder))
 	}
 	return records
 }
