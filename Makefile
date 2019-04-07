@@ -1,10 +1,12 @@
 build:
-	go build -o csvparser main.go
+	go build -o ./bin/csvparser ./main.go
 
-run:
+preprcess:
 	cd input && /Applications/LibreOffice.app/Contents/MacOS/soffice --convert-to xlsx *.xls --headless
 	rm input/*.xls
-	./csvparser input
+
+run:
+	./bin/csvparser ./input ing
 
 restore:
 	mv archive/* input
