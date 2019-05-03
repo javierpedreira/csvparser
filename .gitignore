@@ -1,4 +1,4 @@
 *.csv
 archive
 input
-./bin/csvparser
+bin/csvparser
