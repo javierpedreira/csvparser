@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/360EntSecGroup-Skylar/excelize"
+	"github.com/extrame/xls"
 )
 
 const SKIP_LINES = 6
@@ -179,13 +179,13 @@ func handleArgs() (string, string, string) {
 }
 
 func readInputFile(filename string) [][]string {
-	xlsx, err := excelize.OpenFile(filename)
+	xlsFile, err := xls.Open(filename, "utf-8")
 	if err != nil {
 		log.Fatalln("error opening xlsx file", err)
 		return nil
 	}
 
-	return xlsx.GetRows(SHEET_NAME)
+	return xlsFile.ReadAllCells(300)
 }
 
 func archiveFile(filePath, filename string) {
