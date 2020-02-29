@@ -2,3 +2,4 @@
 archive
 input
 bin/csvparser
+config/categories.json
